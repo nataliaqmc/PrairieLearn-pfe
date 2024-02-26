@@ -124,7 +124,7 @@
             </thead>
             <tbody>
               <% questions.forEach(function(row, i) { %>
-              <tr>
+              <tr style="height: 8rem;">
                 <td>
                   <a href="<%= urlPrefix %>/question/<%= row.question_id %>/">
                     <%= row.assessment_question_number %>. <%= row.question_title %>
