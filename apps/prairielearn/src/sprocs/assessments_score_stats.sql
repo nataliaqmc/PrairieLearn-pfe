@@ -20,7 +20,8 @@ BEGIN
     -- then use their maximum score
     WITH student_assessment_scores AS (
         SELECT
-            max(ai.score_perc) AS score_perc
+            max(ai.score_perc) AS score_perc,
+            count(ai.)
         FROM
             assessment_instances AS ai
             JOIN assessments AS a ON (a.id = ai.assessment_id)
