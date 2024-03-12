@@ -6,6 +6,7 @@
     <script src="<%= node_modules_asset_path('d3/dist/d3.min.js') %>"></script>
     <script src="<%= asset_path('localscripts/scatter.js') %>"></script>
     <script src="<%= asset_path('localscripts/histmini.js') %>"></script>
+    <script src="<%= asset_path('localscripts/barPlot.js') %>"></script>
     <script src="<%= asset_path('localscripts/histogram.js') %>"></script>
   </head>
   <body>
@@ -111,15 +112,53 @@
         </div>
 
         <div class="card-body">
-          <div id="difficultyDiscriminationScatter" class="scatter"></div>
+          <div id="QuestionsvsAttempts" class="scatter"></div>
           <script>
             $(function() {
                 var xdata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
-                var ydata = [<% questions.forEach(function(question) { %><%= question.number_submissions_hist %>,<% }); %>];
+                var ydata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
+                var options = {
+                  xlabel: "Question",
+                  ylabel: "Number of Attempts",
+                  ymin: 0,
+                  xmin: 0,
+                };
+                barplot("#QuestionsvsAttempts", xdata, ydata, options);
+            });
+          </script>
+        </div>
+          <div class="card-footer">
+            <small>
+              <ul>
+                <li><strong>Mean score</strong> of a question is the average score for all students on the question. It is best to have a range of questions with different mean scores on the test, with some easy (mean score above 90%) and some hard (mean score below 50%).</li>
+                <li><strong>Discrimination</strong> of a question is the correlation coefficient between the scores on the question and the total assessment scores. Discrimination values should be above 20%, unless a question is very easy (mean score above 95%), in which case it is acceptable to have lower discriminations. It is always better to have higher discriminations for all questions, and a range of discriminations is not desired.</li>
+              </ul>
+            </small>
+          </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <%= assessment_set.name %> <%= assessment.number %>: Number of Attempts by Question
+          <div class="ml-auto">
+            <small><span class="text-light mr-2">Last calculated: <%= stats_last_updated %></span></small>
+            <button type="button" class="btn btn-sm btn-light" tabindex="0"
+               data-toggle="modal" data-target="#refreshAssessmentQuestionStatsModal">
+                <i class="fa fa-sync" aria-hidden="true"></i> Recalculate statistics
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div id="QuestionsvcAttempts" class="scatter"></div>
+          <script>
+            $(function() {
+                var xdata = [<% questions.forEach(function(question) { %><%= question.number_submissions_hist %>,<% }); %>];
+                var ydata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
                 var labels = [<% questions.forEach(function(question) { %><%= question.number_submissions_hist %>,<% }); %>];
                 var options = {
-                    xgrid: _.range(0, 100, 0),
-                    ygrid: _.range(0, 100, 0),
+                    xgrid: _.range(0, 100, 1),
+                    ygrid: _.range(0, 100, 1),
                     xlabel: 'Questions',
                     ylabel: 'Amount of Attempts',
                     ymin: 0,
@@ -128,7 +167,7 @@
                     topMargin: 30,
                     labels: labels
                 };
-                histogram("#difficultyDiscriminationScatter", xdata, ydata, options);
+                histogram("#QuestionsvcAttempts", ydata, xdata, options);
             });
           </script>
         </div>
