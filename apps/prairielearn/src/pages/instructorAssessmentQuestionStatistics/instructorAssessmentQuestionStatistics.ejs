@@ -100,7 +100,7 @@
       </div>
       <div class="card mb-4">
         <div class="card-header bg-primary text-white d-flex align-items-center">
-          <%= assessment_set.name %> <%= assessment.number %>: Question Number of Attempts by Date
+          <%= assessment_set.name %> <%= assessment.number %>: Number of Attempts by Question
           <div class="ml-auto">
             <small><span class="text-light mr-2">Last calculated: <%= stats_last_updated %></span></small>
             <button type="button" class="btn btn-sm btn-light" tabindex="0"
@@ -110,19 +110,20 @@
           </div>
         </div>
 
-        <% if (assessment.score_stat_number >= 0) { %>
         <div class="card-body">
           <div id="difficultyDiscriminationScatter" class="scatter"></div>
           <script>
             $(function() {
                 var xdata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
                 var ydata = [<% questions.forEach(function(question) { %><%= question.number_submissions_hist %>,<% }); %>];
-                var labels = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
+                var labels = [<% questions.forEach(function(question) { %><%= question.number_submissions_hist %>,<% }); %>];
                 var options = {
-                    xgrid: _.range(0, 100, 1),
-                    ygrid: _.range(0, 100, 1),
+                    xgrid: _.range(0, 100, 0),
+                    ygrid: _.range(0, 100, 0),
                     xlabel: 'Questions',
                     ylabel: 'Amount of Attempts',
+                    ymin: 0,
+                    xmin: 0,
                     radius: 2,
                     topMargin: 30,
                     labels: labels
@@ -139,13 +140,6 @@
               </ul>
             </small>
           </div>
-        <% } else { %>
-
-        <div class="card-body">
-          No student data.
-        </div>
-
-        <% }%>
       </div>
 
       <div class="card mb-4">
