@@ -6,6 +6,55 @@ FROM
 WHERE
   a.id = $assessment_id;
 
+-- BLOCK select_total_students
+SELECT
+  COUNT(e.course_instance_id) AS students_total,
+FROM
+  assessments AS a
+  LEFT JOIN enrollments AS e ON (a.course_instance_id = e.course_instance_id)
+WHERE
+  a.course_instance_id = $course_instance_id
+GROUP BY
+  a.id;
+
+-- BLOCK barplot
+SELECT
+  t1.question,
+  t1.submissions,
+  t2.students_total
+FROM
+  (
+    SELECT
+      v.question_id as question,
+      COUNT(DISTINCT v.user_id) as submissions,
+      SUM(
+        CASE
+          WHEN s.correct = 't' THEN 1
+          ELSE 0
+        END
+      ) AS correct
+    FROM
+      submissions as s
+      LEFT JOIN variants as v ON (s.variant_id = v.id)
+    WHERE
+      v.course_instance_id = 2
+    GROUP BY
+      v.question_id
+  ) AS t1
+  JOIN (
+    SELECT
+      v.question_id as question,
+      COUNT(DISTINCT e.user_id) AS students_total
+    FROM
+      assessments as a
+      LEFT JOIN enrollments as e ON (a.course_instance_id = e.course_instance_id)
+      LEFT JOIN variants as v ON (a.course_instance_id = v.course_instance_id)
+    WHERE
+      a.course_instance_id = 2
+    GROUP BY
+      v.question_id
+  ) AS t2 ON t1.question = t2.question;
+
 -- BLOCK assessment_stats_last_updated
 SELECT
   CASE

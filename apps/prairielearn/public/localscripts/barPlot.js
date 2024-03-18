@@ -9,6 +9,8 @@ function barplot(selector, xdata, ydata, options) {
     leftMargin: 70,
     barWidth: 20,
   });
+  // Define custom colors
+  var customColors = ['#28a745', '#dc3545']; // Example colors
 
   var width = options.width - options.leftMargin - options.rightMargin;
   var height = options.height - options.topMargin - options.bottomMargin;
@@ -17,12 +19,14 @@ function barplot(selector, xdata, ydata, options) {
 
   var y = d3
     .scaleLinear()
-    .domain([0, d3.max(ydata)])
+    .domain([0, d3.max(ydata.map((d) => d.reduce((acc, val) => acc + val, 0)))])
     .nice()
     .range([height, 0]);
 
   var xAxis = d3.axisBottom(x);
   var yAxis = d3.axisLeft(y);
+
+  var color = d3.scaleOrdinal().range(customColors);
 
   var svg = d3
     .select(selector)
@@ -62,20 +66,32 @@ function barplot(selector, xdata, ydata, options) {
     .attr('transform', 'rotate(-90)')
     .text(options.ylabel);
 
-  svg
+  // Stacked Bars
+  var bars = svg
     .selectAll('.bar')
-    .data(ydata)
+    .data(d3.stack().keys(d3.range(ydata[0].length))(ydata))
+    .enter()
+    .append('g')
+    .attr('class', 'bar')
+    .style('fill', function (d, i) {
+      return color(i);
+    });
+
+  bars
+    .selectAll('rect')
+    .data(function (d) {
+      return d;
+    })
     .enter()
     .append('rect')
-    .attr('class', 'bar')
-    .attr('x', function (_, i) {
+    .attr('x', function (d, i) {
       return x(xdata[i]);
     })
-    .attr('width', x.bandwidth())
     .attr('y', function (d) {
-      return y(d);
+      return y(d[1]);
     })
     .attr('height', function (d) {
-      return height - y(d);
-    });
+      return y(d[0]) - y(d[1]);
+    })
+    .attr('width', x.bandwidth());
 }

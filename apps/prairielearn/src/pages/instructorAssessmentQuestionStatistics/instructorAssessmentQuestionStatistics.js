@@ -39,6 +39,12 @@ router.get(
     });
     res.locals.assessment = assessmentResult.rows[0].assessment;
 
+    // re-fetch assessment to get updated statistics
+    const submissionsByQuestion = await sqldb.queryAsync(sql.barplot, {
+      course_instance_id: res.locals.course_instance.id,
+    });
+    res.locals.submissionsByQuestion = submissionsByQuestion.rows;
+
     // Fetch assessments.stats_last_updated (the time when we last updated
     // the _question_ statistics for this assessment). Note that this is
     // different to assessments.statistics_last_updated_at (the time we last
@@ -89,6 +95,7 @@ router.get(
             record.qid,
             record.question_title,
             record.mean_question_score,
+            record.median_question_score,
             record.question_score_variance,
             record.discrimination,
             record.some_submission_perc,
@@ -113,6 +120,8 @@ router.get(
             record.number_submissions_variance,
             record.number_submissions_hist,
             record.quintile_question_scores,
+            record.number_submissions,
+            record.total_students_enrolled,
           ];
         },
       });

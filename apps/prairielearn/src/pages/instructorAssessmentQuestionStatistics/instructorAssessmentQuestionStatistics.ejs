@@ -101,7 +101,48 @@
       </div>
       <div class="card mb-4">
         <div class="card-header bg-primary text-white d-flex align-items-center">
-          <%= assessment_set.name %> <%= assessment.number %>: Number of Attempts by Question
+          <%= assessment_set.name %> <%= assessment.number %>: Mean vs
+          <div class="ml-auto">
+            <small><span class="text-light mr-2">Last calculated: <%= stats_last_updated %></span></small>
+            <button type="button" class="btn btn-sm btn-light" tabindex="0"
+               data-toggle="modal" data-target="#refreshAssessmentQuestionStatsModal">
+                <i class="fa fa-sync" aria-hidden="true"></i> Recalculate statistics
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div id="MeanVsMedianScatter" class="scatter"></div>
+          <script>
+            $(function() {
+                var xdata = [<% questions.forEach(function(question) { %><%= question.mean_question_score %>,<% }); %>];
+                var ydata = [<% questions.forEach(function(question) { %><%= question.median_question_score %>,<% }); %>];
+                var labels = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
+                var options = {
+                    xgrid: _.range(0, 110, 10),
+                    ygrid: _.range(0, 110, 10),
+                    xlabel: 'mean score / %',
+                    ylabel: 'median score',
+                    radius: 2,
+                    topMargin: 30,
+                    labels: labels
+                };
+                scatter("#MeanVsMedianScatter", xdata, ydata, options);
+            });
+          </script>
+        </div>
+          <div class="card-footer">
+            <small>
+              <ul>
+                <li><strong>Mean score</strong> of a question is the average score for all students on the question. It is best to have a range of questions with different mean scores on the test, with some easy (mean score above 90%) and some hard (mean score below 50%).</li>
+                <li><strong>Discrimination</strong> of a question is the correlation coefficient between the scores on the question and the total assessment scores. Discrimination values should be above 20%, unless a question is very easy (mean score above 95%), in which case it is acceptable to have lower discriminations. It is always better to have higher discriminations for all questions, and a range of discriminations is not desired.</li>
+              </ul>
+            </small>
+          </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <%= assessment_set.name %> <%= assessment.number %>: Number of User Submissions by Question
           <div class="ml-auto">
             <small><span class="text-light mr-2">Last calculated: <%= stats_last_updated %></span></small>
             <button type="button" class="btn btn-sm btn-light" tabindex="0"
@@ -116,12 +157,21 @@
           <script>
             $(function() {
                 var xdata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
-                var ydata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
+                
+                var ydata = [<% submissionsByQuestion.forEach(function(question) { %>
+                              [<%= question.submissions %>, <%= question.students_total - question.submissions %>],
+                          <% }); %>];
                 var options = {
-                  xlabel: "Question",
-                  ylabel: "Number of Attempts",
+                  width: 600, // Width of the SVG container
+                  height: 400, // Height of the SVG container
+                  topMargin: 10, // Top margin for the plot
+                  rightMargin: 20, // Right margin for the plot
+                  bottomMargin: 55, // Bottom margin for the plot
+                  leftMargin: 70, // Left margin for the plot
+                  xlabel: "Question", // Label for the x-axis
+                  ylabel: "Number of Submissions", // Label for the y-axis
+                  vmin: 0,
                   ymin: 0,
-                  xmin: 0,
                 };
                 barplot("#QuestionsvsAttempts", xdata, ydata, options);
             });
@@ -130,8 +180,7 @@
           <div class="card-footer">
             <small>
               <ul>
-                <li><strong>Mean score</strong> of a question is the average score for all students on the question. It is best to have a range of questions with different mean scores on the test, with some easy (mean score above 90%) and some hard (mean score below 50%).</li>
-                <li><strong>Discrimination</strong> of a question is the correlation coefficient between the scores on the question and the total assessment scores. Discrimination values should be above 20%, unless a question is very easy (mean score above 95%), in which case it is acceptable to have lower discriminations. It is always better to have higher discriminations for all questions, and a range of discriminations is not desired.</li>
+                <li><strong>Number of submissions</strong> of a question is amount of students who have already submitted a answer for that specific question.</li>
               </ul>
             </small>
           </div>
@@ -153,8 +202,8 @@
           <div id="QuestionsvcAttempts" class="scatter"></div>
           <script>
             $(function() {
-                var xdata = [<% questions.forEach(function(question) { %><%= question.number_submissions_hist %>,<% }); %>];
-                var ydata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
+                var xdata = [<% questions.forEach(function(question) { %><%= question.assessment_question_number %>,<% }); %>];
+                var ydata = [<% questions.forEach(function(question) { %><%= question.number_submissions %>,<% }); %>];
                 var labels = [<% questions.forEach(function(question) { %><%= question.number_submissions_hist %>,<% }); %>];
                 var options = {
                     xgrid: _.range(0, 100, 1),
