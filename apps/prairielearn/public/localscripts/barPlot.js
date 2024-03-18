@@ -37,6 +37,15 @@ function barplot(selector, xdata, ydata, options) {
     .append('g')
     .attr('transform', 'translate(' + options.leftMargin + ',' + options.topMargin + ')');
 
+  // Gridlines
+  svg
+    .append('g')
+    .attr('class', 'grid')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(d3.axisBottom(x).tickSize(-height).tickFormat(''));
+
+  svg.append('g').attr('class', 'grid').call(d3.axisLeft(y).tickSize(-width).tickFormat(''));
+
   // X Axis
   svg
     .append('g')
